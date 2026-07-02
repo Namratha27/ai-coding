@@ -1,0 +1,23 @@
+# --- Tooling artifacts (not part of the exercise) ---
+.tools/
+
+# --- C# / .NET ---
+bin/
+obj/
+*.user
+
+# --- Python ---
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# --- Java / Maven ---
+target/
+
+# --- Editors / OS ---
+.vs/
+.idea/
+.vscode/
+*.swp
+.DS_Store
