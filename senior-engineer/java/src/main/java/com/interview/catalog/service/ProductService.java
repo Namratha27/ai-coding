@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Business logic for the product catalog. Talks to the simulated Cosmos container
@@ -57,27 +58,41 @@ public class ProductService {
                 .sorted(Comparator.comparing(Product::getId))
                 .toList();
 
-        // BUG #1: pagination parameters are ignored — every matching item is
-        // returned regardless of page / pageSize.
-        List<Product> items = ordered;
+        // BUG #1: pagination parameters were ignored. Implement pagination
+        // using 1-based page indexing. Defensive defaults: page=1, pageSize=10.
+        if (page <= 0) page = 1;
+        if (pageSize <= 0) pageSize = 10;
+
+        int fromIndex = (page - 1) * pageSize;
+        if (fromIndex >= ordered.size()) {
+            return ServiceResult.ok(List.of());
+        }
+        int toIndex = Math.min(fromIndex + pageSize, ordered.size());
+        List<Product> items = ordered.subList(fromIndex, toIndex);
 
         return ServiceResult.ok(items);
     }
 
     public ServiceResult<Product> get(String id) {
         Product product = products.readItem(id);
-
-        // BUG #4: a missing product is returned as a 200 with a null body
-        // instead of a 404.
+        if (product == null) {
+            return ServiceResult.notFound("Product '" + id + "' not found");
+        }
         return ServiceResult.ok(product);
     }
 
     public ServiceResult<Product> create(CreateProductRequest request) {
-        // BUG #3: no validation — a zero/negative price (or empty name) is accepted.
+        // Validate input (BUG #3)
+        if (request.name() == null || request.name().trim().isEmpty()) {
+            return ServiceResult.badRequest("Name must not be empty");
+        }
+        if (request.price() <= 0) {
+            return ServiceResult.badRequest("Price must be greater than zero");
+        }
 
         Product product = new Product();
-        // BUG #2: the id is never generated, so the stored document and the
-        // response come back with an empty id and cannot be fetched later.
+        // Generate an id so items are addressable (BUG #2)
+        product.setId(UUID.randomUUID().toString());
         product.setName(request.name());
         product.setCategory(request.category());
         product.setPrice(request.price());
@@ -119,6 +134,25 @@ public class ProductService {
      * This is intentionally NOT implemented — design and build it.
      */
     public ServiceResult<Product> attachImage(String id, byte[] content, String contentType) {
-        throw new UnsupportedOperationException("Bonus: implement the image-upload end-to-end flow.");
+        // BONUS: implement end-to-end image upload
+        // 1) validate product exists
+        Product product = products.readItem(id);
+        if (product == null) {
+            return ServiceResult.notFound("Product '" + id + "' not found");
+        }
+
+        // 2) upload bytes to simulated blob container
+        String blobName = id + "-" + UUID.randomUUID().toString();
+        String blobUrl = images.upload(blobName, content);
+
+        // 3) persist the returned blob URL on the product
+        product.setImageUrl(blobUrl);
+        Product updated = products.replaceItem(product);
+
+        // 4) publish ImageAdded event onto the simulated Queue
+        String eventPayload = "{\"type\":\"ImageAdded\",\"productId\":\"" + id + "\",\"imageUrl\":\"" + blobUrl + "\"}";
+        events.sendMessage(eventPayload);
+
+        return ServiceResult.ok(updated);
     }
 }

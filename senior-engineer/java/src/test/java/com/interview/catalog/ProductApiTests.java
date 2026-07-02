@@ -98,6 +98,13 @@ class ProductApiTests {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
+    /*
+    check what this "deleteThenGetReturns404" test is doing
+     and explain in simple terms what this is doing and take to actual method it's calling.
+     Then suggest the optimal fix without breaking any other functionality.
+     Should production level where other things should get affected, such as saclablity, performance etc.
+     Do not edit directly until I say so.
+    * */
 
     @Test
     void deleteThenGetReturns404() {
