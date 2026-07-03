@@ -8,6 +8,7 @@ This document records the full session activity while working on the Java Produc
 
 1) Goal
 
+- Do not expose any credentials or secrets in the code or logs.
 - Inspect the Product Catalog Service, explain its structure and important flows.
 - Fix failing tests in `java/src/test/java/com/interview/catalog/ProductApiTests.java`.
 - Make minimal, correct changes to implement missing behaviour: pagination, resource not-found semantics, id generation, input validation, and the bonus image-upload flow.
