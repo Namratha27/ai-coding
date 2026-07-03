@@ -8,11 +8,29 @@ This document records the full session activity while working on the Java Produc
 
 1) Goal
 
+Rules:
+- No refactoring
+- No new dependencies
+- Preserve public APIs
+- Keep changes under 100 LOC
 - Do not expose any credentials or secrets in the code or logs.
 - Inspect the Product Catalog Service, explain its structure and important flows.
 - Fix failing tests in `java/src/test/java/com/interview/catalog/ProductApiTests.java`.
 - Make minimal, correct changes to implement missing behaviour: pagination, resource not-found semantics, id generation, input validation, and the bonus image-upload flow.
 - Add tests to increase coverage and validate edge cases (the user later asked for this; attempts noted below).
+
+Process:
+1. Identify root causes first
+2. List affected methods
+3. Propose fixes without code
+4. Wait for approval before implementation
+
+Acceptance Criteria:
+- All tests pass
+- Pagination is stable and deterministic
+- Missing resources return 404
+- Create generates UUID ids
+- Validation rejects invalid price/name
 
 ---
 
