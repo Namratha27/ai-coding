@@ -7,6 +7,7 @@ This document records the full session activity while working on the Java Produc
 ---
 
 1) Goal
+   You are a staff/principal backend engineer.
 - Do not expose any credentials or secrets in the code or logs.
 - Inspect the Product Catalog Service, explain its structure and important flows.
 - Fix failing tests in `java/src/test/java/com/interview/catalog/ProductApiTests.java`.
